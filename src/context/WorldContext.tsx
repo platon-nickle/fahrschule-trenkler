@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
 export type World = "fuehrerschein" | "berufskraftfahrer";
@@ -12,22 +12,27 @@ interface WorldContextType {
 
 const WorldContext = createContext<WorldContextType | undefined>(undefined);
 
+function worldFromPathname(pathname: string): World | null {
+  if (pathname.startsWith("/berufskraftfahrer")) return "berufskraftfahrer";
+  if (pathname.startsWith("/fuehrerschein")) return "fuehrerschein";
+  return null;
+}
+
 export function WorldProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || "";
-  const [world, setWorld] = useState<World>("fuehrerschein"); // default to Welt 1
-  const [prevPathname, setPrevPathname] = useState(pathname);
+  const derivedWorld = worldFromPathname(pathname);
+  const [fallbackWorld, setFallbackWorld] = useState<World>(derivedWorld ?? "fuehrerschein");
 
-  if (pathname !== prevPathname) {
-    setPrevPathname(pathname);
-    if (pathname.startsWith("/berufskraftfahrer") && world !== "berufskraftfahrer") {
-      setWorld("berufskraftfahrer");
-    } else if (pathname.startsWith("/fuehrerschein") && world !== "fuehrerschein") {
-      setWorld("fuehrerschein");
-    }
-  }
+  // Pages outside both worlds (e.g. /ueber-uns) keep showing the last active world.
+  // This runs post-commit so it never races the in-flight navigation transition.
+  useEffect(() => {
+    if (derivedWorld) setFallbackWorld(derivedWorld);
+  }, [derivedWorld]);
+
+  const world = derivedWorld ?? fallbackWorld;
 
   return (
-    <WorldContext.Provider value={{ world, setWorld }}>
+    <WorldContext.Provider value={{ world, setWorld: setFallbackWorld }}>
       {children}
     </WorldContext.Provider>
   );

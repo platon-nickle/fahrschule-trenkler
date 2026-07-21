@@ -76,7 +76,7 @@ export default function TimelineSection() {
   return (
     <section
       ref={containerRef}
-      className="py-20 md:py-24 bg-offwhite overflow-hidden border-b border-divider"
+      className="py-20 md:py-24 bg-white overflow-hidden border-b border-divider"
     >
       <div className="max-w-container mx-auto px-6">
         <h2 className="text-h2 md:text-h2-md mb-16 text-center">Dein Weg zum Führerschein</h2>

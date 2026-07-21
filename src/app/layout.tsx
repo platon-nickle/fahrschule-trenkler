@@ -26,7 +26,7 @@ export default function RootLayout({
         <WorldProvider>
           <SmoothScroller>
             <Navigation />
-            <main className="flex-1 pt-[120px]">
+            <main className="flex-1 pt-[176px]">
               {children}
             </main>
             <Footer />

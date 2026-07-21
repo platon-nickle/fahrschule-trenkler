@@ -1,6 +1,6 @@
 import ServiceTileGrid from "@/components/sections/ServiceTileGrid";
 import ClosingCTA from "@/components/sections/ClosingCTA";
-import ImagePlaceholder from "@/components/ui/ImagePlaceholder";
+import Image from "next/image";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -32,19 +32,28 @@ export default function BerufskraftfahrerHub() {
               Von der Grundqualifikation bis zu den Pflichtmodulen. Wir schulen Ihre Mitarbeiter praxisnah, effizient und zertifiziert nach höchsten IHK- und TÜV-Standards.
             </p>
           </div>
-          <div>
-            <ImagePlaceholder label="PLATZHALTER: LKW Flotte, 16:9" ratio="16:9" className="rounded-xl border border-white/20" />
+          <div className="relative aspect-video rounded-xl border border-white/20 overflow-hidden">
+            <Image
+              src="/LKW-Bild.jpg"
+              alt="LKW Flotte der Fahrschule Trenkler"
+              fill
+              className="object-cover"
+            />
           </div>
         </div>
       </section>
 
       {/* Credential Band */}
       <section className="py-8 bg-offwhite border-b border-divider overflow-hidden">
-        <div className="max-w-container mx-auto px-6 flex flex-wrap justify-center md:justify-between items-center gap-8 opacity-60 grayscale">
-          <ImagePlaceholder label="IHK LOGO" ratio="auto" className="h-12 w-32 bg-transparent" />
-          <ImagePlaceholder label="TÜV HESSEN LOGO" ratio="auto" className="h-12 w-32 bg-transparent" />
-          <ImagePlaceholder label="AZAV ZERTIFIZIERT LOGO" ratio="auto" className="h-12 w-32 bg-transparent" />
-          <ImagePlaceholder label="BKF LOGO" ratio="auto" className="h-12 w-32 bg-transparent" />
+        <div className="max-w-container mx-auto px-6 flex justify-start items-center">
+          <div className="relative h-16 w-40">
+            <Image
+              src="/azav-zertifizierung.jpg"
+              alt="AZAV Zertifizierung"
+              fill
+              className="object-contain"
+            />
+          </div>
         </div>
       </section>
 

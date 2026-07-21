@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 
 export default function ClosingCTA() {
@@ -11,7 +10,7 @@ export default function ClosingCTA() {
         
         <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12 w-full max-w-2xl">
           <Button size="lg" className="w-full md:w-auto" asChild>
-            <Link href="#anmeldung">Jetzt anmelden!</Link>
+            <a href="https://www.vogel-system.de/de/news/fahrschul-manager-news/maxi-so-funktionierts" target="_blank" rel="noopener noreferrer">Jetzt anmelden!</a>
           </Button>
           
           <div className="flex flex-col items-center md:items-start">

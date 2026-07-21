@@ -33,20 +33,30 @@ export default function SmoothScroller({
 }) {
   const isReducedMotion = useSyncExternalStore(subscribeReducedMotion, getReducedMotionSnapshot, () => false);
 
-  useLenis(ScrollTrigger.update);
+  const lenis = useLenis(ScrollTrigger.update);
 
   useEffect(() => {
     // Images (e.g. the hero carousel) can finish loading after ScrollTrigger's
     // initial measurement, shifting page height and desyncing pinned sections.
-    const refresh = () => ScrollTrigger.refresh();
+    // Lenis also caches the document height internally, so it needs its own
+    // resize() call or it caps scrolling at the stale (shorter) height.
+    const refresh = () => {
+      lenis?.resize();
+      ScrollTrigger.refresh();
+    };
     window.addEventListener("load", refresh);
+    window.addEventListener("resize", refresh);
     const images = Array.from(document.images).filter((img) => !img.complete);
     images.forEach((img) => img.addEventListener("load", refresh));
+    const resizeObserver = new ResizeObserver(refresh);
+    resizeObserver.observe(document.body);
     return () => {
       window.removeEventListener("load", refresh);
+      window.removeEventListener("resize", refresh);
       images.forEach((img) => img.removeEventListener("load", refresh));
+      resizeObserver.disconnect();
     };
-  }, []);
+  }, [lenis]);
 
   // If reduced motion is requested, render without Lenis entirely to preserve native scroll behavior completely
   if (isReducedMotion) {

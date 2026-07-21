@@ -10,7 +10,7 @@ export default function Footer() {
         <div>
           <Link href="/" className="relative shrink-0 mb-4 block" style={{ width: 190, height: 48 }}>
             <Image
-              src="/trenkler-logo.jpg"
+              src="/trenkler-logo-transparent.png"
               alt="Fahrschule Trenkler"
               fill
               className="object-contain object-left"

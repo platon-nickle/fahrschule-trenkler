@@ -21,30 +21,31 @@ import { usePathname } from "next/navigation";
 export default function Navigation() {
   const { world } = useWorld();
   const [scrolled, setScrolled] = useState(false);
-  const [scrollDir, setScrollDir] = useState("up");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
-  const [prevPathname, setPrevPathname] = useState(pathname);
-
-  if (pathname !== prevPathname) {
-    setPrevPathname(pathname);
-    if (mobileMenuOpen) {
-      setMobileMenuOpen(false);
-    }
-  }
 
   useEffect(() => {
-    let lastScrollY = window.scrollY;
-    
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    let ticking = false;
+
     const updateScroll = () => {
-      const scrollY = window.scrollY;
-      setScrollDir(scrollY > lastScrollY && scrollY > 50 ? "down" : "up");
-      setScrolled(scrollY > 50);
-      lastScrollY = scrollY > 0 ? scrollY : 0;
+      setScrolled(window.scrollY > 50);
+      ticking = false;
     };
 
-    window.addEventListener("scroll", updateScroll);
-    return () => window.removeEventListener("scroll", updateScroll);
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        window.requestAnimationFrame(updateScroll);
+      }
+    };
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const navLinks = {
@@ -64,12 +65,13 @@ export default function Navigation() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50">
-      {/* TopBar */}
-      <div 
+    <header className="fixed top-0 left-0 right-0 z-50 pointer-events-auto">
+      {/* TopBar — collapses via max-height/opacity, freeing up space in normal flow so the
+          main navbar slides up smoothly with no transform hacks or jitter. */}
+      <div
         className={cn(
-          "bg-ink text-caption text-white/80 transition-transform duration-250 border-b border-white/10",
-          scrollDir === "down" ? "-translate-y-full absolute" : "translate-y-0 relative"
+          "bg-ink text-caption text-white/80 overflow-hidden transition-all duration-300 ease-out border-white/10",
+          scrolled ? "max-h-0 opacity-0 border-b-0" : "max-h-20 opacity-100 border-b"
         )}
       >
         <div className="max-w-container mx-auto px-6 h-10 flex items-center justify-between">
@@ -105,48 +107,58 @@ export default function Navigation() {
         </div>
       </div>
 
-      {/* Main Navbar */}
-      <div 
-        className={cn(
-          "bg-ink transition-transform duration-250",
-          scrollDir === "down" ? "-translate-y-10" : "translate-y-0"
-        )}
-      >
-        {/* Switcher integrated above nav content */}
-        <div className="max-w-container mx-auto px-6 pt-4 flex justify-center md:justify-end">
-          <div className="flex bg-white/10 p-1 rounded-full">
-            <Link 
-              href="/fuehrerschein"
-              className={cn(
-                "px-6 py-1.5 rounded-full text-small font-semibold transition-colors",
-                world === "fuehrerschein" ? "bg-accent text-ink" : "text-white hover:text-accent"
-              )}
-            >
-              Führerschein
-            </Link>
-            <Link 
-              href="/berufskraftfahrer"
-              className={cn(
-                "px-6 py-1.5 rounded-full text-small font-semibold transition-colors",
-                world === "berufskraftfahrer" ? "bg-accent text-ink" : "text-white hover:text-accent"
-              )}
-            >
-              Berufskraftfahrer
-            </Link>
+      {/* Main Navbar — always visible, never transformed; only its children resize/collapse */}
+      <div className="bg-ink relative">
+        {/* Switcher integrated above nav content — collapses fully once scrolled */}
+        <div
+          className={cn(
+            "overflow-hidden transition-all duration-300",
+            scrolled ? "max-h-0 opacity-0" : "max-h-20 opacity-100"
+          )}
+        >
+          <div className="max-w-container mx-auto px-6 pt-4 flex justify-center md:justify-end">
+            <div className="flex bg-white/10 p-1 rounded-full">
+              <Link
+                href="/fuehrerschein"
+                className={cn(
+                  "px-6 py-1.5 rounded-full text-small font-semibold transition-colors",
+                  world === "fuehrerschein" ? "bg-accent text-ink" : "text-white hover:text-accent"
+                )}
+              >
+                Führerschein
+              </Link>
+              <Link
+                href="/berufskraftfahrer"
+                className={cn(
+                  "px-6 py-1.5 rounded-full text-small font-semibold transition-colors",
+                  world === "berufskraftfahrer" ? "bg-accent text-ink" : "text-white hover:text-accent"
+                )}
+              >
+                Berufskraftfahrer
+              </Link>
+            </div>
           </div>
         </div>
 
         <div className="max-w-container mx-auto px-6 h-20 flex items-center justify-between">
-          <Link href="/" className="relative shrink-0 transition-all" style={{ width: scrolled ? 160 : 190, height: scrolled ? 40 : 48 }}>
+          <Link
+            href="/"
+            className="relative shrink-0 transition-all duration-300"
+            style={{
+              width: scrolled ? 160 : 260,
+              height: scrolled ? 40 : 56,
+              marginTop: scrolled ? 0 : -32,
+            }}
+          >
             <Image
-              src="/trenkler-logo.jpg"
+              src="/trenkler-logo-transparent.png"
               alt="Fahrschule Trenkler"
               fill
               className="object-contain object-left"
               preload
             />
           </Link>
-          
+
           <nav className="hidden md:flex items-center gap-8">
             {navLinks[world].map((link) => (
               <Link 
@@ -167,7 +179,7 @@ export default function Navigation() {
 
           <div className="hidden md:block">
             <Button asChild>
-              <Link href="#anmeldung">Jetzt anmelden!</Link>
+              <a href="https://www.vogel-system.de/de/news/fahrschul-manager-news/maxi-so-funktionierts" target="_blank" rel="noopener noreferrer">Jetzt anmelden!</a>
             </Button>
           </div>
 
@@ -186,7 +198,7 @@ export default function Navigation() {
           <div className="flex items-center justify-between p-6">
             <Link href="/" className="relative shrink-0 bg-ink rounded-md p-2" style={{ width: 176, height: 48 }}>
               <Image
-                src="/trenkler-logo.jpg"
+                src="/trenkler-logo-transparent.png"
                 alt="Fahrschule Trenkler"
                 fill
                 className="object-contain"
@@ -231,7 +243,7 @@ export default function Navigation() {
 
           <div className="p-6 bg-offwhite border-t border-divider mt-auto flex flex-col gap-4">
             <Button className="w-full" asChild>
-              <Link href="#anmeldung">Jetzt anmelden!</Link>
+              <a href="https://www.vogel-system.de/de/news/fahrschul-manager-news/maxi-so-funktionierts" target="_blank" rel="noopener noreferrer">Jetzt anmelden!</a>
             </Button>
             <a href="tel:+4969813825" className="flex items-center justify-center gap-2 text-ink font-bold py-2">
               <Phone className="w-5 h-5" /> 069 813825
